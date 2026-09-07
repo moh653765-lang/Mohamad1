@@ -1,0 +1,362 @@
+import os, shutil, zipfile
+
+root="/mnt/data/docker_server_manager"
+if os.path.exists(root): shutil.rmtree(root)
+os.makedirs(root+"/backend", exist_ok=True)
+os.makedirs(root+"/flutter/lib", exist_ok=True)
+
+files={
+"backend/requirements.txt":"""fastapi==0.115.6
+uvicorn[standard]==0.34.0
+docker==7.1.0
+pydantic==2.10.4
+""",
+"backend/main.py":r'''import os
+import docker
+from fastapi import FastAPI, Header, HTTPException
+from pydantic import BaseModel
+
+API_TOKEN = os.getenv("API_TOKEN", "change-me")
+app = FastAPI(title="Docker Server Manager API")
+client = docker.from_env()
+
+def auth(authorization: str | None):
+    if authorization != f"Bearer {API_TOKEN}":
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+class ContainerRequest(BaseModel):
+    name: str
+
+@app.get("/health")
+def health():
+    return {"ok": True}
+
+@app.get("/containers")
+def containers(authorization: str | None = Header(default=None)):
+    auth(authorization)
+    return [
+        {"id": c.short_id, "name": c.name, "status": c.status}
+        for c in client.containers.list(all=True)
+    ]
+
+@app.post("/containers/start")
+def start(req: ContainerRequest, authorization: str | None = Header(default=None)):
+    auth(authorization)
+    try:
+        c = client.containers.get(req.name)
+        c.start()
+        c.reload()
+        return {"ok": True, "name": c.name, "status": c.status}
+    except docker.errors.NotFound:
+        raise HTTPException(status_code=404, detail="Container not found")
+    except docker.errors.APIError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/containers/stop")
+def stop(req: ContainerRequest, authorization: str | None = Header(default=None)):
+    auth(authorization)
+    try:
+        c = client.containers.get(req.name)
+        c.stop()
+        c.reload()
+        return {"ok": True, "name": c.name, "status": c.status}
+    except docker.errors.NotFound:
+        raise HTTPException(status_code=404, detail="Container not found")
+
+@app.post("/containers/restart")
+def restart(req: ContainerRequest, authorization: str | None = Header(default=None)):
+    auth(authorization)
+    try:
+        c = client.containers.get(req.name)
+        c.restart()
+        c.reload()
+        return {"ok": True, "name": c.name, "status": c.status}
+    except docker.errors.NotFound:
+        raise HTTPException(status_code=404, detail="Container not found")
+
+@app.get("/containers/{name}/logs")
+def logs(name: str, authorization: str | None = Header(default=None)):
+    auth(authorization)
+    try:
+        c = client.containers.get(name)
+        text = c.logs(tail=200).decode("utf-8", errors="replace")
+        return {"name": c.name, "logs": text}
+    except docker.errors.NotFound:
+        raise HTTPException(status_code=404, detail="Container not found")
+''',
+"backend/Dockerfile":r'''FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY main.py .
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+''',
+"backend/docker-compose.yml":r'''services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      API_TOKEN: "replace-with-a-long-random-token"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+''',
+"flutter/pubspec.yaml":r'''name: docker_server_manager
+description: Flutter client for a remote Docker management API.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+''',
+"flutter/lib/main.dart":r'''import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+void main() => runApp(const App());
+
+class DockerApi {
+  final String baseUrl;
+  final String token;
+  DockerApi(this.baseUrl, this.token);
+
+  Map<String,String> get headers => {
+    'Authorization': 'Bearer $token',
+    'Content-Type': 'application/json',
+  };
+
+  Future<List<dynamic>> containers() async {
+    final r = await http.get(Uri.parse('$baseUrl/containers'), headers: headers);
+    if (r.statusCode != 200) throw Exception(r.body);
+    return jsonDecode(r.body);
+  }
+
+  Future<void> action(String endpoint, String name) async {
+    final r = await http.post(
+      Uri.parse('$baseUrl/containers/$endpoint'),
+      headers: headers,
+      body: jsonEncode({'name': name}),
+    );
+    if (r.statusCode != 200) throw Exception(r.body);
+  }
+
+  Future<String> logs(String name) async {
+    final r = await http.get(Uri.parse('$baseUrl/containers/$name/logs'), headers: headers);
+    if (r.statusCode != 200) throw Exception(r.body);
+    return jsonDecode(r.body)['logs'] ?? '';
+  }
+}
+
+class App extends StatelessWidget {
+  const App({super.key});
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(brightness: Brightness.dark, colorSchemeSeed: Colors.blue),
+    home: const DockerPage(),
+  );
+}
+
+class DockerPage extends StatefulWidget {
+  const DockerPage({super.key});
+  @override State<DockerPage> createState() => _DockerPageState();
+}
+
+class _DockerPageState extends State<DockerPage> {
+  // Change these two values to your server's API address and token.
+  final api = DockerApi('http://YOUR_SERVER_IP:8000', 'replace-with-a-long-random-token');
+  List<dynamic> items = [];
+  bool loading = true;
+  String? error;
+
+  @override
+  void initState() { super.initState(); refresh(); }
+
+  Future<void> refresh() async {
+    setState(() { loading = true; error = null; });
+    try {
+      items = await api.containers();
+    } catch (e) {
+      error = 'تعذر الاتصال بالـ Backend: $e';
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  Future<void> start(String name) async {
+    try {
+      await api.action('start', name);
+      await refresh();
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('تم تشغيل $name')),
+      );
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('فشل Start: $e')),
+      );
+    }
+  }
+
+  Future<void> stop(String name) async {
+    try { await api.action('stop', name); await refresh(); }
+    catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e'))); }
+  }
+
+  Future<void> restart(String name) async {
+    try { await api.action('restart', name); await refresh(); }
+    catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e'))); }
+  }
+
+  Future<void> showLogs(String name) async {
+    try {
+      final text = await api.logs(name);
+      if (!mounted) return;
+      showDialog(context: context, builder: (_) => AlertDialog(
+        title: Text('Logs: $name'),
+        content: SizedBox(width: 500, child: SingleChildScrollView(child: SelectableText(text.isEmpty ? 'لا توجد سجلات.' : text))),
+      ));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Directionality(
+    textDirection: TextDirection.rtl,
+    child: Scaffold(
+      appBar: AppBar(
+        title: const Text('Docker Manager'),
+        actions: [IconButton(onPressed: refresh, icon: const Icon(Icons.refresh))],
+      ),
+      body: loading
+        ? const Center(child: CircularProgressIndicator())
+        : error != null
+          ? Center(child: Padding(padding: const EdgeInsets.all(20), child: Text(error!)))
+          : RefreshIndicator(
+              onRefresh: refresh,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: items.length,
+                itemBuilder: (_, i) {
+                  final c = items[i] as Map<String,dynamic>;
+                  final name = c['name'] as String;
+                  final status = c['status'] as String;
+                  final running = status == 'running';
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(children: [
+                        ListTile(
+                          leading: Icon(Icons.view_in_ar, color: running ? Colors.green : Colors.red),
+                          title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text(status),
+                        ),
+                        Wrap(spacing: 8, children: [
+                          FilledButton.icon(
+                            onPressed: running ? null : () => start(name),
+                            icon: const Icon(Icons.play_arrow), label: const Text('Start'),
+                          ),
+                          FilledButton.tonalIcon(
+                            onPressed: running ? () => stop(name) : null,
+                            icon: const Icon(Icons.stop), label: const Text('Stop'),
+                          ),
+                          FilledButton.tonalIcon(
+                            onPressed: () => restart(name),
+                            icon: const Icon(Icons.refresh), label: const Text('Restart'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: () => showLogs(name),
+                            icon: const Icon(Icons.article_outlined), label: const Text('Logs'),
+                          ),
+                        ]),
+                      ]),
+                    ),
+                  );
+                },
+              ),
+            ),
+    ),
+  );
+}
+''',
+"README.md":r'''# Docker Server Manager — Flutter + FastAPI
+
+## 1) Backend على السيرفر الذي يحتوي Docker
+
+ثبت Docker وDocker Compose، ثم:
+
+```bash
+cd backend
+# عدّل API_TOKEN داخل docker-compose.yml إلى قيمة طويلة وعشوائية
+docker compose up -d --build
+```
+
+اختبار:
+
+```bash
+curl http://YOUR_SERVER_IP:8000/health
+```
+
+يجب أن يرجع:
+
+```json
+{"ok":true}
+```
+
+## 2) تشغيل Flutter
+
+داخل `flutter/lib/main.dart` غيّر:
+
+```dart
+DockerApi('http://YOUR_SERVER_IP:8000', 'replace-with-a-long-random-token');
+```
+
+ثم:
+
+```bash
+cd flutter
+flutter pub get
+flutter run
+```
+
+## 3) زر Start
+
+عند الضغط على Start، Flutter يرسل:
+
+`POST /containers/start`
+
+والـ Backend يستخدم Docker SDK لتنفيذ `container.start()` على السيرفر.
+
+## الأمان
+
+لا تعرض Docker socket للإنترنت مباشرة. الأفضل وضع الـ API خلف HTTPS (مثل Nginx/Caddy) وFirewall، واستخدام Token قوي أو نظام مستخدمين/JWT. صلاحية Docker socket تعادل تقريباً صلاحيات عالية جداً على المضيف، لذلك شغّل الـ Backend على سيرفر مخصص أو معزول عند الإمكان.
+'''
+}
+
+for rel, data in files.items():
+    p=os.path.join(root,rel)
+    os.makedirs(os.path.dirname(p),exist_ok=True)
+    with open(p,"w",encoding="utf-8") as f: f.write(data)
+
+zip_path="/mnt/data/docker_server_manager_flutter_fastapi.zip"
+with zipfile.ZipFile(zip_path,"w",zipfile.ZIP_DEFLATED) as z:
+    for base,_,names in os.walk(root):
+        for n in names:
+            p=os.path.join(base,n)
+            z.write(p,os.path.relpath(p,root))
+print(zip_path)
