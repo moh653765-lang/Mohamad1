@@ -1,29 +1,85 @@
 {
-"inbounds": [
-{
-"port": 8080,
-"protocol": "vless",
-"settings": {
-"clients": [
-{
-"id": "d2cb8181-233c-4d18-9972-8a1b04db2244",
-"level": 0
-}
-],
-"decryption": "none"
-},
-"streamSettings": {
-"network": "ws",
-"wsSettings": {
-"path": "/personhomah"
-}
-}
-}
-],
-"outbounds": [
-{
-"protocol": "freedom",
-"settings": {}
-}
-]
+  "EncryptedConfig": {
+    "inbounds": [
+      {
+        "listen": "$SOCKS5_LISTEN_HOST",
+        "port": "$SOCKS5_LISTEN_PORT",
+        "protocol": "socks",
+        "settings": {
+          "auth": "noauth",
+          "udp": true,
+          "userLevel": 8
+        }
+      },
+      {
+        "listen": "$HTTP_LISTEN_HOST",
+        "port": "$HTTP_LISTEN_PORT",
+        "protocol": "http",
+        "settings": {
+          "userLevel": 8
+        }
+      }
+    ],
+    "log": {
+      "loglevel": "none"
+    },
+    "outbounds": [
+      {
+        "mux": {
+          "concurrency": 8,
+          "enabled": "$MUX_ENABLED"
+        },
+        "protocol": "vmess",
+        "settings": {
+          "vnext": [
+            {
+              "address": "",
+              "port": 443,
+              "users": [
+                {
+                  "alterId": 0,
+                  "encryption": "",
+                  "flow": "",
+                  "id": "d2cb8181-233c-4d18-9972-8a1b04db0044",
+                  "level": 8,
+                  "security": "chacha20-poly1305"
+                }
+              ]
+            }
+          ]
+        },
+        "streamSettings": {
+          "network": "ws",
+          "security": "tls",
+          "tlsSettings": {
+            "allowInsecure": true,
+            "serverName": ""
+          },
+          "wsSettings": {
+            "headers": {
+              "Host": ""
+            },
+            "path": "Télégram/@MOHAMaaaaal/@VLessVMessTroja"
+          }
+        }
+      }
+    ],
+    "policy": {
+      "levels": {
+        "8": {
+          "connIdle": 300,
+          "downlinkOnly": 1,
+          "handshake": 4,
+          "uplinkOnly": 1
+        }
+      },
+      "system": {
+        "statsOutboundDownlink": false,
+        "statsOutboundUplink": false
+      }
+    },
+    "stats": {}
+  },
+  "IsEncrypted": true,
+  "IsInjectModeEnabled": false
 }
