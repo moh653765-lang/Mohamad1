@@ -11,7 +11,7 @@ InboundConfigurationObject
 {
     "clients":[
         {
-            "password": "MOHAMaaaaal",
+            "password": "Mohamad ",
             "email": "Télégram/@MOHAMaaaaal/@VLessVMessTroja",
             "level": 0
         }
@@ -37,7 +37,7 @@ UDP 包编码方式，默认值为 None。 当该值为 None 时，UDP 将根据
 
 ClientObject
 {
-    "password": "MOHAMaaaaal",
+    "password": "Mohamad ",
     "email": "Télégram/@MOHAMaaaaal/@VLessVMessTroja",
     "level": 0,
 }
@@ -70,7 +70,7 @@ OutboundConfigurationObject
         {
             "address": "127.0.0.1",
             "port": 443,
-            "password": "MOHAMaaaaal",
+            "password": "Mohamad ",
             "email": "Télégram/@MOHAMaaaaal/@VLessVMessTroja",
             "level": 0
         }
@@ -84,7 +84,7 @@ ServerObject
 {
     "address": "127.0.0.1",
     "port": 443,
-    "password": "MOHAMaaaaal",
+    "password": "Mohamad ",
     "email": "Télégram/@MOHAMaaaaal/@VLessVMessTroja",
     "level": 0
 }
