@@ -19,13 +19,13 @@ API_ID ='@MOHAMaaaaal'
 API_HASH = '@VLESSVMessTroja'
 BOT_TOKEN = '8809694697:AAEkVnK8PYf4UesG7uXLkFgZ1fdqp3gsSOE'
 
-client = TelegramClient('AM2_D3', API_ID, API_HASH@VLESSVMessTroja).start(bot_token=8809694697:AAEkVnK8PYf4UesG7uXLkFgZ1fdqp3gsSOE)
+client = TelegramClient('@MOHAMaaaaal', API_ID, API_HASH@VLESSVMessTroja).start(bot_token=8809694697:AAEkVnK8PYf4UesG7uXLkFgZ1fdqp3gsSOE)
 
 # ==========================================
 VLESS_TEMPLATE = (
-    "vless://aaaa1111-bbbb-4ccc-8ddd-eeeeffff0000@google.com:443"
-    "?path=%2FTelegram%2F%40AM2_D3%2F%40AHMAD3214&security=tls&encryption=none"
-    "&host={domain}&type=ws&sni={domain}#%40AHMAD3214"
+    d2cb8181-233c-4d18-9972-8a1b04db2244@google.com:443"
+    "?path=%2FTelegram%2F%40MOHAMaaaaal%2F%40VLESSVMessTroja&security=tls&encryption=none"
+    "&host={domain}&type=ws&sni={domain}#%40MOHAMaaaaal"
 )
 
 
@@ -90,7 +90,7 @@ JSON_TEMPLATE = r'''{
               {
                 "encryption": "none",
                 "flow": "",
-                "id": "aaaa1111-bbbb-4ccc-8ddd-eeeeffff0000",
+                "id": "d2cb8181-233c-4d18-9972-8a1b04db2244",
                 "level": 8
               }
             ]
@@ -108,7 +108,7 @@ JSON_TEMPLATE = r'''{
           "headers": {
             "Host": "__DOMAIN__"
           },
-          "path": "/Telegram/@AM2_D3/@AHMAD3214"
+          "path": "Télégram/@MOHAMaaaaal/@VLessVMessTroja"
         }
       },
       "tag": "VLESS"
@@ -127,10 +127,10 @@ JSON_TEMPLATE = r'''{
           "Host": "yt3.ggpht.com:443",
           "Proxy-Connection": "keep-alive",
           "User-Agent": "FBAV/0.0",
-          "X-iorg-bsid": "@AM2_D3"
+          "X-iorg-bsid": "@MOHAMaaaaal"
         }
       },
-      "tag": "@AM2_D3"
+      "tag": "@MOHAMaaaaal"
     },
     {
       "protocol": "freedom",
@@ -176,9 +176,7 @@ JSON_TEMPLATE = r'''{
 
 
 
-DARKTUNNEL_BASE_URI = "darktunnel://eyJ0eXBlIjoiVkxFU1MiLCJuYW1lIjoi2YXYrNin2YbZiiDYp9iz2YrYpyDZiCDYp9ir2YrYsSAiLCJ2bGVzc1R1bm5lbENvbmZpZyI6eyJ2MnJheUNvbmZpZyI6eyJob3N0IjoiYWx0MTMueXQzLmdncGh0LmNvbSIsInBvcnQiOjQ0MywidXVpZCI6ImFhYWExMTExLWJiYmItNGNjYy04ZGRkLWVlZWVmZmZmMDAwMCIsInNlcnZlck5hbWVJbmRpY2F0aW9uIjoiYWx0MTMueXQzLmdncGh0LmNvbSIsIndzUGF0aCI6Ii9UZWxlZ3JhbS9AQU0yX0QzL0BBSE1BRDMyMTQiLCJ3c0hlYWRlckhvc3QiOiJhaG1lZC12aXAxLTQxNDAwODYxMjEyMy5ldXJvcGUtd2VzdDEucnVuLmFwcCJ9LCJpbmplY3RDb25maWciOnsiZW5hYmxlZCI6dHJ1ZSwibW9kZSI6IlBST1hZIiwicHJveHlIb3N0IjoiMTU3LjI0MC45LjM5IiwicGF5bG9hZCI6IkNPTk5FQ1QgW2hvc3RdOltwb3J0XSBIVFRQLzEuMVtjcmxmXXgtY29ubmVjdGVkLXRvOiAzNC4xNDMuNzIuMltjcmxmXXByb3h5LWNvbm5lY3Rpb246IGtlZXAtYWxpdmVbY3JsZl1jb25uZWN0aW9uOiBrZWVwLWFsaXZlW2NybGZddXNlci1hZ2VudDogRkJBVi8wLjAgW2NybGZdeC1pb3JnLWJzaWQ6IEBBTTJfRDNbY3JsZl1bY3JsZl0ifX19"
-
-
+DARKTUNNEL_BASE_URI = "darktunnel://eyJ0eXBlIjoiVkxFU1MiLCJuYW1lIjoiTW9oYW1hZCAx4pyoIiwidm1lc3NUdW5uZWxDb25maWciOnsidjJyYXlDb25maWciOnsiaG9zdCI6Imdvb2dsZS5jb20iLCJwb3J0Ijo0NDMsInV1aWQiOiJkMmNiODE4MS0yMzNjLTRkMTgtOTk3Mi04YTFiMDRkYjAwNDQiLCJzZXJ2ZXJOYW1lSW5kaWNhdGlvbiI6InlvdXR1YmUuY29tIiwid3NQYXRoIjoiVMOpbMOpZ3JhbS9ATU9IQU1hYWFhYWwvQFZMZXNzVk1lc3NUcm9qYSIsIndzSGVhZGVySG9zdCI6Im1vaGFtYWQtMTIzLTYxODk5NTI3MDAudXMtY2VudHJhbDEucnVuLmFwcCJ9fSwidmxlc3NUdW5uZWxDb25maWciOnsidjJyYXlDb25maWciOnsiaG9zdCI6InlvdXR1YmUuY29tIiwicG9ydCI6NDQzLCJ1dWlkIjoiZDJjYjgxODEtMjMzYy00ZDE4LTk5NzItOGExYjA0ZGIyMjQ0Iiwic2VydmVyTmFtZUluZGljYXRpb24iOiJ5b3V0dWJlLmNvbSIsIndzUGF0aCI6Ii9wZXJzb25ob21haCIsIndzSGVhZGVySG9zdCI6Im1vaGFtYWQxLTc3MTM3Nzk5NDYzLnVzLWNlbnRyYWwxLnJ1bi5hcHAifX19"
 # ==========================================
 # ==========================================
 
@@ -473,7 +471,7 @@ async def start(event):
         "🔗 **الرابط:**\n"
         "https://www.skills.google/focuses/82384?parent=catalog\n\n"
 
-        "@AM2_D3"
+        "@MOHAMaaaaal"
     )
     await event.reply(welcome_msg)
 
