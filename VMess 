@@ -16,10 +16,10 @@ OutboundConfigurationObject
     "vnext": [
         {
             "address": "127.0.0.1",
-            "port": 37192,
+            "port": 443,
             "users": [
                 {
-                    "id": "27848739-7e62-4138-9fd3-098a63964b6b",
+                    "id": "d2cb8181-233c-4d18-9972-8a1b04db2244",
                     "alterId": 0,
                     "security": "auto",
                     "level": 0
@@ -35,7 +35,7 @@ vnext：[ ServerObject ]
 ServerObject
 {
     "address": "127.0.0.1",
-    "port": 37192,
+    "port": 443,
     "users": []
 }
 address: address
@@ -52,7 +52,7 @@ users: [ UserObject ]
 
 UserObject
 {
-    "id": "27848739-7e62-4138-9fd3-098a63964b6b",
+    "id": "d2cb8181-233c-4d18-9972-8a1b04db2244",
     "alterId": 0,
     "security": "auto",
     "level": 0
@@ -102,10 +102,10 @@ InboundConfigurationObject
 {
     "clients": [
         {
-            "id": "27848739-7e62-4138-9fd3-098a63964b6b",
+            "id": "d2cb8181-233c-4d18-9972-8a1b04db2244",
             "level": 0,
             "alterId": 0,
-            "email": "love@v2ray.com"
+            "email": "Télégram/@MOHAMaaaaal/@VLessVMessTroja"
         }
     ],
     "default": {
@@ -137,10 +137,10 @@ disableInsecureEncryption: true | false
 "aes-128-cfb"
 ClientObject
 {
-    "id": "27848739-7e62-4138-9fd3-098a63964b6b",
+    "id": d2cb8181-233c-4d18-9972-8a1b04db2244",
     "level": 0,
     "alterId": 4,
-    "email": "love@v2ray.com"
+    "email": "Télégram/@MOHAMaaaaal/@VLessVMessTroja"
 }
 id: string
 
